@@ -1,0 +1,81 @@
+{%extends 'main/base.html' %}
+{% block title %}
+Приложение
+{% endblock %}
+{% block username %}
+{{usr.name}}
+{% endblock %}
+
+{% block content %}
+<div class="container bg-light">
+    <div class="row justify-content-md-center">
+        <div class="d-flex flex-column flex-shrink-0 p-3 " style="width: 280px;">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modaladdworkspace">
+                + Создать пространство
+            </button>
+
+
+            <div class="modal fade" id="modaladdworkspace" tabindex="-1" role="dialog"
+                 aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Создать пространство</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="recipient-name" class="col-form-label">Название</label>
+                                    <input type="text" class="form-control" id="recipient-name" name="workspace_name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="text" class="col-form-label">Описание</label>
+                                    <input type="text" class="form-control" id="text" name="workspace_description">
+                                </div>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn btn-primary">Создать</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            </p>
+            <div class="collapse" id="collapseworspaces">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Active</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">Disabled</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="list-group">
+            {%for el in user.workspace_permissions_set.all%}
+            <a href="{{user.pk}}/{{el.workspace_id.pk}}" class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{el.workspace_id.name}}</h5>
+                </div>
+                <p class="mb-1">Описание: {{el.workspace_id.description}}</p>
+            </a>
+            {%endfor%}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

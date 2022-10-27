@@ -1,0 +1,359 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Рабочие пространства
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown1">
+                    <a class="dropdown-item" href="/{{user.pk}}">Перейти к рабочим пространствам</a>
+                    <div class="dropdown-divider"></div>
+                    {% for el in user.workspace_permissions_set.all %}
+                    <a class="dropdown-item" href="/{{user.pk}}/{{el.workspace_id.pk}}">{{el.workspace_id.name}}</a>
+                    {% endfor %}
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Доски
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
+                    {% for el in user.workspace_permissions_set.all %}
+                    {% for brd in el.workspace_id.board_set.all %}
+                    <a class="dropdown-item" href="/{{user.pk}}/{{el.workspace_id.pk}}/{{brd.pk}}">{{brd.name}}</a>
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown3" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Профиль
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
+                    <a class="dropdown-item" href="/{{user.pk}}/profile">Настройки профиля</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/">Выйти</a>
+                </div>
+            </li>
+
+        </ul>
+    </div>
+</nav>
+<div class=" p-3 bg-light text-dark text-center justify-content-md-center">
+    <h1>{{work_space.name}}</h1>
+</div>
+<ul class="nav nav-tabs justify-content-center bg-light" id="myTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link text-dark" id="home-tab" data-toggle="tab" href="#home" role="tab"
+           aria-controls="home"
+           aria-selected="true">Доски</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+           aria-controls="profile"
+           aria-selected="false">Настройки пространства</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" id="contact-tab" data-toggle="tab" href="#contact" role="tab"
+           aria-controls="contact"
+           aria-selected="false">Участники</a>
+    </li>
+</ul>
+<div class="tab-content " id="myTabContent">
+    <div class="tab-pane m-5" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <div class="container ">
+            <div class="row justify-content-md-center">
+                {%for el in boards%}
+                <div class="card m-2" style="width: 18rem;">
+                    <img class="card-img-top"
+                         src="https://cdn.pixabay.com/photo/2016/08/23/16/16/wallpaper-1614874_960_720.jpg"
+                         alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">{{el.name}}</h5>
+                        <p class="card-text">{{el.description}}</p>
+                        <a href="{{work_space.pk}}/{{el.pk}}/" class="btn btn-primary">Перейти к доске</a>
+                        <form>
+                            <input type="hidden" name="board_to_delete" value="{{el.pk}}">
+                            <button hx-post="{{work_space.pk}}/delete-board" hx-target="#workspace-show" type="button"
+                                    class="btn btn-danger">Удалить доску
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {%endfor%}
+                <button type="button" class="btn btn-outline-secondary m-2" style="width: 18rem" data-toggle="modal"
+                        data-target="#modaladdboard">Добавить доску
+                </button>
+
+                <div class="modal fade" id="modaladdboard" tabindex="-1" role="dialog"
+                     aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLongTitle">Создать новую доску</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="recipient-name" class="col-form-label">Название</label>
+                                        <input type="text" class="form-control" id="recipient-name" name="board_name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="text" class="col-form-label">Описание</label>
+                                        <input type="text" class="form-control" id="text" name="board_description">
+                                    </div>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                                    <button type="submit" class="btn btn-primary" value="add_workspace"
+                                            name="add_workspace">Создать
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <div class="container p-3">
+            <div class="row justify-content-md-center ">
+                <form method="post" action="{{work_space.pk}}/delete-workspace" class="p-1">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-name">Название</span>
+                        </div>
+                        <input type="text" class="form-control" aria-label="description" name="workspace_name"
+                               aria-describedby="inputGroup-description" value="{{work_space.name}}">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-description">Описание</span>
+                        </div>
+                        <input type="text" class="form-control" aria-label="description" name="workspace_description"
+                               aria-describedby="inputGroup-description" value="{{work_space.description}}">
+                    </div>
+                    <button hx-post="{{work_space.pk}}/change-workspace" hx-target="#workspace-show" type="button"
+                            class="btn btn-primary">Сохранить
+                    </button>
+                    <button type="submit" class="btn btn-danger">Удалить пространство</button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+        <div class="container ">
+            <div class="row justify-content-md-center">
+
+                <div class="alert bg-light m-5" role="alert">
+                    <h4 class="alert-heading">Участники рабочего пространства</h4>
+                    <p>Участники рабочего пространства могут просматривать доски рабочего пространства и присоединятся
+                        к ним, а также создавать новые доски и управлять ими</p>
+                    <hr>
+                    <div class="container ">
+                        <div class="row">
+                            <div class="col">
+                                <p class="mb-0">Приглашайте пользователей в рабочее пространство,
+                                    вы можете настроить для каждого пользователя его права в рабочем пространства</p>
+                            </div>
+                            <button type="button" class="btn btn-primary" data-toggle="modal"
+                                    data-target="#modaladdusertow">Пригласить пользователей
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {%for el in permissions_list%}
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{el.user_id.name}}
+                    {% if el.is_creator %}
+                    <label type="text">Создатель</label>
+                    {% else %}
+                    <button type="button" class="btn btn-outline-secondary"  data-toggle="modal"
+                            data-target="#modaladduserpermissions_{{el.user_id.pk}}"> Изменить права
+                    </button>
+                    <button type="button" class="close" aria-label="Close" data-toggle="modal"
+                            data-target="#modaldeleteuserfromw{{el.user_id.pk}}" name="delete">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {% endif %}
+                </li>
+            </ul>
+            {% endfor %}
+        </div>
+
+        {%for el in permissions_list%}
+        <div class="modal fade" id="modaldeleteuserfromw{{el.user_id.pk}}" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content rounded-4 shadow">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title">Удаление участника</h5>
+
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="modal-body py-0">
+                            <p>Следующий участник будет удалён из рабочего пространства и не сможет просматривать его
+                                содержимое </p>
+                            <input type="text" readonly class="form-control-plaintext" id="staticname"
+                                   value="{{el.user_id.name}}" name="user_to_delete">
+                        </div>
+                        <div class="modal-footer flex-column border-top-0">
+                            <button type="submit" class="btn btn-lg btn-primary w-100 mx-0 mb-2" name="delete">Удалить
+                                пользователя
+                            </button>
+                            <button type="button" class="btn btn-lg btn-secondary w-100 mx-0 mb-2" data-dismiss="modal">
+                                Отмена
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="modal fade" id="modaladdusertow" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalLongTitle">Создать новую доску</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="list-group mx-0 w-auto">
+                                {%for el in not_added_usrs%}
+                                <label class="list-group-item m-2 d-flex gap-2">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="{{el.pk}}"
+                                               name="{{el.pk}}">
+                                        <label class="custom-control-label" for="{{el.pk}}">{{el.name}}</label>
+                                    </div>
+                                </label>
+                                {%endfor%}
+                            </div>
+                            <hr>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                            <button type="submit" class="btn btn-primary" value="add_user" name="add_user">Добавить
+                                пользователей
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% for el in permissions_list %}
+        <div class="modal fade" id="modaladduserpermissions_{{el.user_id.pk}}" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalTitle_permissions">Изменить права пользователя</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            {% csrf_token %}
+                        <input type="hidden" name="user_to_change" value="{{el.user_id.pk}}">
+                            <div class="list-group mx-0 w-auto">
+                                <label class="list-group-item d-flex gap-2">
+                                    <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="1_p" name="1_p"
+                                           {% if el.permission_add_board %} checked {% endif %}>
+
+                                    <label class="custom-control-label" for="1_p">Добавление/удаление доски</label>
+                                    </div>
+                                </label>
+                                <label class="list-group-item d-flex gap-2">
+                                    <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="2_p" name="2_p"
+                                           {% if el.permission_add_file %} checked {% endif %}>
+
+                                    <label class="custom-control-label" for="2_p">Добавление/удаление файлов</label>
+                                    </div>
+                                </label>
+                                <label class="list-group-item d-flex gap-2">
+                                    <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="3_p" name="3_p"
+                                           {% if el.permission_add_user %} checked {% endif %}>
+
+                                    <label class="custom-control-label" for="3_p">Добавление пользователей в пространство</label>
+                                    </div>
+                                </label>
+                                <label class="list-group-item d-flex gap-2">
+                                    <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="4_p" name="4_p"
+                                           {% if el.permission_change_workspace %} checked {% endif %}>
+
+                                    <label class="custom-control-label" for="4_p">Изменение настроек пространства</label>
+                                    </div>
+                                </label>
+                                <label class="list-group-item d-flex gap-2">
+                                    <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="5_p" name="5_p"
+                                           {% if el.permission_delete_workspace %} checked {% endif %}>
+
+                                    <label class="custom-control-label" for="5_p">Удаление пространства</label>
+                                    </div>
+                                </label>
+                                <label class="list-group-item d-flex gap-2">
+                                    <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="6_p" name="6_p"
+                                           {% if el.permission_delete_user %} checked {% endif %}>
+
+                                    <label class="custom-control-label" for="6_p">Удаление участников</label>
+                                    </div>
+                                </label>
+                                <label class="list-group-item d-flex gap-2">
+                                    <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input " id="7_p" name="7_p"
+                                           {% if el.permission_read_boards %} checked {% endif %}>
+
+                                    <label class="custom-control-label" for="7_p">Просматривать доски</label>
+                                    </div>
+                                </label>
+                            </div>
+
+
+
+                            <hr>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                            <button type="button" class="btn btn-primary"
+                                    hx-post="{{work_space.pk}}/change-user" hx-target="#workspace-show"
+                                    data-dismiss="modal">Сохранить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
